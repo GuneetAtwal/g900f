@@ -2051,6 +2051,10 @@ static int ftrace_shutdown(struct ftrace_ops *ops, int command)
 			control_ops_free(ops);
 	}
 
+	if (!command || !ftrace_enabled)
+		return 0;
+
+	ftrace_run_update_code(command);
 	return 0;
 }
 
@@ -4660,7 +4664,7 @@ void unregister_ftrace_graph(void)
 	ftrace_graph_active--;
 	ftrace_graph_return = (trace_func_graph_ret_t)ftrace_stub;
 	ftrace_graph_entry = ftrace_graph_entry_stub;
-	__ftrace_graph_entry = ftrace_graph_entry_stub;
+
 	ftrace_shutdown(&fgraph_ops, FTRACE_STOP_FUNC_RET);
 	unregister_pm_notifier(&ftrace_suspend_notifier);
 	unregister_trace_sched_switch(ftrace_graph_probe_sched_switch, NULL);
