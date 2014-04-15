@@ -240,8 +240,8 @@ void __sched __down_write_nested(struct rw_semaphore *sem, int subclass)
 
 	raw_spin_lock_irqsave(&sem->wait_lock, flags);
 
-	if (sem->activity == 0 && list_empty(&sem->wait_list)) {
-		/* granted */
+	if (sem->activity == 0) {
+		/* got the lock */
 		sem->activity = -1;
 		raw_spin_unlock_irqrestore(&sem->wait_lock, flags);
 
