@@ -20,7 +20,6 @@ ifndef CONFIG_ARCH_FSM9XXX
 endif
 		obj-$(CONFIG_DEBUG_FS) += pmic_debugfs.o
 	endif
-	endif
 endif
 
 obj-y += acpuclock.o
