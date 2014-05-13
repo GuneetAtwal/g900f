@@ -8,6 +8,16 @@
 #include <linux/bug.h>
 #include <linux/slab.h>
 
+/*
+ * On almost all architectures and configurations, 0 can be used as the
+ * upper ceiling to free_pgtables(): on many architectures it has the same
+ * effect as using TASK_SIZE.  However, there is one configuration which
+ * must impose a more careful limit, to avoid freeing kernel pgtables.
+ */
+#ifndef USER_PGTABLES_CEILING
+#define USER_PGTABLES_CEILING	0UL
+#endif
+
 #ifdef CONFIG_TIMA_RKP_L2_GROUP
 /* Structure of a grouped entry */
 typedef struct tima_l2group_entry {
@@ -76,16 +86,6 @@ static inline void write_tima_rkp_group_buffers(unsigned long num_entries,
 		free_pages((unsigned long) *buffer2, 0);
 }
 #endif	/* CONFIG_TIMA_RKP_L2_GROUP */
-
-/*
- * On almost all architectures and configurations, 0 can be used as the
- * upper ceiling to free_pgtables(): on many architectures it has the same
- * effect as using TASK_SIZE.  However, there is one configuration which
- * must impose a more careful limit, to avoid freeing kernel pgtables.
- */
-#ifndef USER_PGTABLES_CEILING
-#define USER_PGTABLES_CEILING	0UL
-#endif
 
 #ifndef __HAVE_ARCH_PTEP_SET_ACCESS_FLAGS
 extern int ptep_set_access_flags(struct vm_area_struct *vma,
