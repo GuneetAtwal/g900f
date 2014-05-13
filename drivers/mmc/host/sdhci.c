@@ -27,7 +27,6 @@
 
 #include <linux/mmc/mmc.h>
 #include <linux/mmc/host.h>
-#include <linux/mmc/card.h>
 
 #include "sdhci.h"
 
