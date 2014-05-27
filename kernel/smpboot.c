@@ -183,20 +183,9 @@ __smpboot_create_thread(struct smp_hotplug_thread *ht, unsigned int cpu)
 		kfree(td);
 		return PTR_ERR(tsk);
 	}
+
 	get_task_struct(tsk);
 	*per_cpu_ptr(ht->store, cpu) = tsk;
-	if (ht->create) {
-		/*
-		 * Make sure that the task has actually scheduled out
-		 * into park position, before calling the create
-		 * callback. At least the migration thread callback
-		 * requires that the task is off the runqueue.
-		 */
-		if (!wait_task_inactive(tsk, TASK_PARKED))
-			WARN_ON(1);
-		else
-			ht->create(cpu);
-	}
 	return 0;
 }
 
@@ -236,7 +225,7 @@ static void smpboot_park_thread(struct smp_hotplug_thread *ht, unsigned int cpu)
 {
 	struct task_struct *tsk = *per_cpu_ptr(ht->store, cpu);
 
-	if (tsk && !ht->selfparking)
+	if (tsk)
 		kthread_park(tsk);
 }
 
