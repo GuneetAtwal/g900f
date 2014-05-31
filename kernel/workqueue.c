@@ -84,7 +84,7 @@ enum {
 	NR_WORKER_POOLS		= 2,		/* # worker pools per gcwq */
 
 	BUSY_WORKER_HASH_ORDER	= 6,		/* 64 pointers */
-
+	
 	MAX_IDLE_WORKERS_RATIO	= 4,		/* 1/4 of busy can be idle */
 	IDLE_WORKER_TIMEOUT	= 300 * HZ,	/* keep idle ones for 5 mins */
 
@@ -858,7 +858,6 @@ static inline void worker_clr_flags(struct worker *worker, unsigned int flags)
 static struct worker *find_worker_executing_work(struct global_cwq *gcwq,
 						 struct work_struct *work)
 {	struct worker *worker;
-
 	struct hlist_node *tmp;
 
 	hash_for_each_possible(gcwq->busy_hash, worker, tmp, hentry, (unsigned long)work)
@@ -1930,8 +1929,6 @@ __acquires(&gcwq->lock)
 	 * currently executing one.
 	 */
 	hash_add(gcwq->busy_hash, &worker->hentry, (unsigned long)work);
-
-	collision = find_worker_executing_work(gcwq, work);
 	if (unlikely(collision)) {
 		move_linked_works(work, &collision->scheduled, NULL);
 		return;
@@ -1939,7 +1936,7 @@ __acquires(&gcwq->lock)
 
 	/* claim and process */
 	debug_work_deactivate(work);
-	hash_add(gcwq->busy_hash, &worker->hentry, (unsigned long)worker);
+	hlist_add_head(&worker->hentry, bwh);
 	worker->current_work = work;
 	worker->current_cwq = cwq;
 	work_color = get_work_color(work);
@@ -3675,6 +3672,7 @@ out_unlock:
 static int __init init_workqueues(void)
 {
 	unsigned int cpu;
+	int i;
 
 	cpu_notifier(workqueue_cpu_up_callback, CPU_PRI_WORKQUEUE_UP);
 	hotcpu_notifier(workqueue_cpu_down_callback, CPU_PRI_WORKQUEUE_DOWN);
