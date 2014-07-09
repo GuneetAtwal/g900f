@@ -1,0 +1,38 @@
+From 9e15de2afc263c18ea2bf55aaf955c6d96d72939 Mon Sep 17 00:00:00 2001
+From: myfluxi <linflux@arcor.de>
+Date: Fri, 27 Dec 2013 21:24:20 +0100
+Subject: [PATCH] PM: devfreq: conservative: Return 0 if GPU just started
+
+Bailing out early is perfectly fine, so do not trigger an error in
+update_devfreq.
+
+Signed-off-by: franciscofranco <franciscofranco.1990@gmail.com>
+---
+ drivers/devfreq/governor_conservative.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/devfreq/governor_conservative.c b/drivers/devfreq/governor_conservative.c
+index 468b6b0..8d8a371 100644
+--- a/drivers/devfreq/governor_conservative.c
++++ b/drivers/devfreq/governor_conservative.c
+@@ -69,7 +69,7 @@ static int devfreq_conservative_func(struct devfreq *devfreq,
+ 	 * has passed since the last run.
+ 	 */
+ 	if (stat.total_time == 0 || priv->bin.total_time < FLOOR)
+-		return 1;
++		return 0;
+ 
+ 	/* Prevent overflow */
+ 	if (stat.busy_time >= 1 << 24 || stat.total_time >= 1 << 24) {
+@@ -270,7 +270,7 @@ static int devfreq_conservative_handler(struct devfreq *devfreq,
+ 
+ 	switch (event) {
+ 	case DEVFREQ_GOV_START:
+-		devfreq_conservative_start(devfreq);
++		ret = devfreq_conservative_start(devfreq);
+ 		break;
+ 
+ 	case DEVFREQ_GOV_STOP:
+-- 
+1.9.3
+
