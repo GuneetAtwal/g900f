@@ -302,15 +302,31 @@ static int lowmem_shrink(struct shrinker *s, struct shrink_control *sc)
 	int other_file;
 	unsigned long nr_to_scan = sc->nr_to_scan;
 
+#ifdef CONFIG_ZSWAP
+struct sysinfo si;
+#endif
+
 	if (nr_to_scan > 0) {
 		if (mutex_lock_interruptible(&scan_mutex) < 0)
 			return 0;
 	}
 
+#ifdef CONFIG_ZSWAP
+si_swapinfo(&si);
+if (!current_is_kswapd())
+#endif
+
 	lowmem_notif_sc.gfp_mask = sc->gfp_mask;
 
 	if (get_free_ram(&other_free, &other_file, sc))
 		lowmem_notify_killzone_approach();
+
+#if defined(CONFIG_MACH_KLTE_KOR)
+#ifdef CONFIG_ZSWAP
+if (current_is_kswapd() && other_file < lowmem_minfree[1])
+other_free -= global_page_state(NR_FREE_CMA_PAGES);
+#endif
+#endif
 
 	if (lowmem_adj_size < array_size)
 		array_size = lowmem_adj_size;
