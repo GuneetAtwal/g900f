@@ -35,6 +35,7 @@ static int devfreq_simple_ondemand_func(struct devfreq *df,
 	struct xstats xs;
 	int err;
 	unsigned long long a, b;
+	struct devfreq_simple_ondemand_data *data = df->data;
 	unsigned long max = (df->max_freq) ? df->max_freq : UINT_MAX;
 
 	if (priv->bus.num)
